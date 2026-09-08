@@ -1,5 +1,10 @@
 const { Pool } = require("pg");
+
 require("dotenv").config();
+
+const isRenderDatabase =
+  process.env.DB_HOST &&
+  process.env.DB_HOST.includes("render.com");
 
 const pool = new Pool({
   host: process.env.DB_HOST,
@@ -7,6 +12,12 @@ const pool = new Pool({
   database: process.env.DB_NAME,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
+
+  // Render PostgreSQL requires SSL.
+  // Local PostgreSQL can continue without SSL.
+  ssl: isRenderDatabase
+    ? { rejectUnauthorized: false }
+    : false,
 });
 
 pool.on("connect", () => {
